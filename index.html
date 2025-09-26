@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百度千帆API调用工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .json-display {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>百度千帆API调用工具</h1>
+            <p>调用百度千帆趋势列表API，获取热门内容数据</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-section">
+                <h2 style="margin-bottom: 20px; color: #333;">API参数设置</h2>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="type">类型 (type):</label>
+                        <input type="text" id="type" value="美食" placeholder="请输入类型">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mediaType">媒体类型 (mediaType):</label>
+                        <select id="mediaType">
+                            <option value="小红书">小红书</option>
+                            <option value="抖音">抖音</option>
+                            <option value="微博">微博</option>
+                            <option value="知乎">知乎</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeRange">时间范围 (timeRange):</label>
+                        <select id="timeRange">
+                            <option value="1">1天</option>
+                            <option value="7">7天</option>
+                            <option value="30">30天</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="token">授权令牌 (Authorization):</label>
+                    <input type="text" id="token" value="xxxxxx" placeholder="请输入您的授权令牌">
+                </div>
+                
+                <button class="btn" onclick="callAPI()" id="callBtn">
+                    调用API
+                </button>
+            </div>
+            
+            <div class="result-section">
+                <div class="result-header">
+                    <div class="result-title">API响应结果</div>
+                    <div class="status" id="status" style="display: none;"></div>
+                </div>
+                
+                <div id="resultContainer" style="display: none;">
+                    <div class="json-display" id="jsonResult"></div>
+                </div>
+                
+                <div id="errorContainer" style="display: none;">
+                    <div class="error-message" id="errorMessage"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function callAPI() {
+            const type = document.getElementById('type').value;
+            const mediaType = document.getElementById('mediaType').value;
+            const timeRange = parseInt(document.getElementById('timeRange').value);
+            const token = document.getElementById('token').value;
+            
+            const callBtn = document.getElementById('callBtn');
+            const status = document.getElementById('status');
+            const resultContainer = document.getElementById('resultContainer');
+            const errorContainer = document.getElementById('errorContainer');
+            const jsonResult = document.getElementById('jsonResult');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // 显示加载状态
+            callBtn.disabled = true;
+            callBtn.innerHTML = '<span class="loading-spinner"></span>正在调用API...';
+            status.style.display = 'block';
+            status.className = 'status loading';
+            status.textContent = '正在请求...';
+            resultContainer.style.display = 'none';
+            errorContainer.style.display = 'none';
+            
+            try {
+                // 使用代理服务器避免CORS问题
+                const proxyUrl = 'http://localhost:5000/api/trending_lists';
+                
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+                
+                const data = {
+                    type: type,
+                    mediaType: mediaType,
+                    timeRange: timeRange
+                };
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(`API错误: ${result.error || response.statusText}`);
+                }
+                
+                // 显示成功结果
+                status.className = 'status success';
+                status.textContent = '请求成功';
+                jsonResult.textContent = JSON.stringify(result, null, 2);
+                resultContainer.style.display = 'block';
+                
+            } catch (error) {
+                // 显示错误信息
+                status.className = 'status error';
+                status.textContent = '请求失败';
+                
+                let errorMsg = error.message;
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg = '连接失败：请确保代理服务器正在运行 (python proxy_server.py)';
+                }
+                
+                errorMessage.textContent = `错误: ${errorMsg}`;
+                errorContainer.style.display = 'block';
+                console.error('API调用错误:', error);
+            } finally {
+                // 恢复按钮状态
+                callBtn.disabled = false;
+                callBtn.innerHTML = '调用API';
+            }
+        }
+        
+        // 检查代理服务器状态
+        async function checkProxyStatus() {
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                if (response.ok) {
+                    console.log('代理服务器连接正常');
+                } else {
+                    console.warn('代理服务器状态异常');
+                }
+            } catch (error) {
+                console.error('无法连接到代理服务器，请确保运行了 python proxy_server.py');
+            }
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('百度千帆API调用工具已加载');
+            checkProxyStatus();
+        });
+    </script>
+</body>
+</html>
